@@ -235,11 +235,11 @@ module.exports.loadModule = function(moduleName) {
 	loadedModule.moduleName = moduleName
 }
 
-module.exports.startServer = function() {
+module.exports.startServer = function(port) {
 	
 
-	httpServer.listen(3000)
-	console.log("server up on 3000")
+	httpServer.listen(port)
+	console.log("server up on", port)
 
 	var timer = 1
 
