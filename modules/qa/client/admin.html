@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<script src="libs/list.min.js"></script>
+	</head>
+	<body onload="adminLoaded()">
+		<div><h4>secret controls</h4></div>
+		<div id="qa-container">
+			<div><a>Question</a><input id="sendQuestion" type="text" /></div>
+			<div><a>Answer</a><input id="sendAnswer" type="text" /></div>
+			<div><input type="submit" onclick="sendQA()" /></div>
+		</div>
+		<div id="user-list">
+			<ul class="list">
+				<li>
+					<span class="id"></span>
+					<span class="lastAnswer"></span>
+					<span><a class="points" href="#!" onclick="givePointsClicked(this)"></a></span>
+				</li>
+			</ul>
+		</div>
+	</body>
+</html>
