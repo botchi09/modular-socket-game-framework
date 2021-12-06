@@ -36,13 +36,37 @@ module.exports.attachAdminEvents = (socket) => {
 			socket.emit("questionCorrect", false)
 		}
 	})
-	socket.on("givePoints", async(sessionId, points) => {
+	socket.on("givePoints", async(sessionId, points, answer) => {
 		if (baseModule.socketIsAdmin(socket)) {
-			var pointRecipient = await baseModule.getSocketFromSessionId(sessionId)
-			var oldPts = await baseModule.getStateAttr(pointRecipient, "points", 0)
-			var newPts = oldPts + points
-			console.log("Giving", points,"pts to",sessionId, "new pts", newPts)
-			await baseModule.setStateAttr(pointRecipient, "points", newPts)
+			var recipients = []
+			var giveToAll = false
+			if (sessionId) {
+				var recipientSocket = await baseModule.getSocketFromSessionId(sessionId)
+				recipients.push(recipientSocket)
+			} else {
+				
+				if (typeof(answer) === "string") { //simple null check fails here, for some reason
+					var states = baseModule.getStates()
+
+					for (var stateSessionId in states) {
+						var recipientSocket = await baseModule.getSocketFromSessionId(stateSessionId)
+						var socketAnswer = await baseModule.getStateAttr(recipientSocket, "lastAnswer", "")
+						if (socketAnswer === answer || answer.length == 0) {
+							recipients.push(recipientSocket)
+							
+						}
+						
+					}
+				}
+			}
+			for (pointRecipient of recipients) {
+
+				var oldPts = await baseModule.getStateAttr(pointRecipient, "points", 0)
+				var newPts = oldPts + points
+				console.log("Giving", points, "pts to", sessionId, "new pts", newPts)
+				await baseModule.setStateAttr(pointRecipient, "points", newPts)
+			}
+			
 		}
 	})
 }

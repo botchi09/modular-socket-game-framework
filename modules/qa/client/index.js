@@ -4,7 +4,10 @@ var questionId = null
 var changeTimer = null
 
 function createStateUpdateHooks() {
+	
 	addStateUpdateHook(() => {
+		console.log("Initial state set", state)
+		setPointsDisplay(state.points)
 		if (state.questionCorrect == true) {
 			questionCorrect()
 		} else {
@@ -16,7 +19,7 @@ function createStateUpdateHooks() {
 	addStateUpdateHook((attr, value) => {
 		if (attr === "points") {
 			console.log("wow points nice!", value)
-		
+			setPointsDisplay(value)
 			
 		}
 	})
@@ -97,4 +100,8 @@ function setAnswer(newAnswer) {
 
 function displayMessage(msg) {
 	$("#display").html(msg)
+}
+
+function setPointsDisplay(points) {
+	$("#points-display").text("Points: " + points)
 }

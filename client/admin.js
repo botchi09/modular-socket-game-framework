@@ -100,6 +100,7 @@ function updateUserList(id, attr, value) {
 
 function sendAdminPassword(pass) {
 	socket.emit("tryAdminAuth", pass)
+	console.log("Authing with",pass)
 }
 
 function createAdminElements() {

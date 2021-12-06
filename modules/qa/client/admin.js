@@ -23,6 +23,7 @@ function addAdminHooks() {
 	socket.on("adminAuthed", async (result) => {
 		if (result) {
 			//alert("Admin!")
+			console.log("Admin authed!")
 			createAdminElements()
 		} else {
 			alert("Wrong password")
@@ -105,15 +106,16 @@ function updateUserList(id, attr, value) {
 
 function sendAdminPassword(pass) {
 	socket.emit("tryAdminAuth", pass)
+	console.log("Authing with", pass)
 }
 
 function createAdminElements() {
-	$("#admin_controls").load("admin.html", function(){adminLoaded()})	
+	$("#admin_controls").load("module/admin.html", function(){adminLoaded()})	
 }
 
-function givePointsClicked(elem) {
-	var id = elem.parentElement.parentElement.firstElementChild.innerText //TODO: ewww
-	var values = getUserValues(id)
+
+
+function promptAwardPoints() {
 	var givePts = null
 	var userPtsPrompt = prompt("How many points?")
 	try {
@@ -123,15 +125,35 @@ function givePointsClicked(elem) {
 		
 	}
 	if (givePts != null && !isNaN(givePts)) {
-		socket.emit("givePoints", id, givePts)
+		return givePts
 	} else {
 		alert("Could not evaluate")
+		return null
+	}
+}
+
+function givePointsToAnswerClicked() {
+	var givePts = promptAwardPoints()
+	if (givePts) {
+		var answer = prompt("To answer?")
+		if (confirm("Give " + givePts + " to answers " + answer + " ?")) {
+			socket.emit("givePoints", null, givePts, answer)
+		}
+	}
+}
+
+function givePointsClicked(elem) {
+	var id = elem.parentElement.parentElement.firstElementChild.innerText //TODO: ewww
+	var values = getUserValues(id)
+	var givePts = promptAwardPoints()
+	if (givePts) {
+		socket.emit("givePoints", id, givePts)
 	}
 	
 }
 
 //body onload hook
 function adminLoaded() {
-	console.log("Admin loaded")
+	console.log("Admin HTML loaded")
 	socket.emit("requestUserList")
 }
