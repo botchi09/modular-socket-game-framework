@@ -12,7 +12,7 @@ async function loadModule() {
 	console.log("Module HTML loaded")
 	moduleLoaded()
 	console.log("Initialising admin funcs")
-	//adminInit() //Initial f2 hooking etc TODO: admin modules
+	adminInit() //Initial f2 hooking etc TODO: admin modules
 
 }
 

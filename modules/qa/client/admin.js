@@ -1,21 +1,25 @@
 
+function promptAdminPassword() {
+	var adminPassword = prompt("Password please")
+	sendAdminPassword(adminPassword)
+}
 
 function adminInit() {
 	if (socket == null) {
+		console.log("Waiting for socket...")
 		setTimeout(adminInit, 500) //Simple wait loop for full init
 	} else {
-		console.log("Adding admin functions")
-		shortcut.add("F2", function() {
-			var adminPassword = prompt("Password please")
-			sendAdminPassword(adminPassword)
+		console.log("Adding module admin functions")
+		shortcut.add("F4", function() {
+			promptAdminPassword()
 		})
 		addAdminHooks()
 	}
 }
-adminInit() //Initial f2 hooking etc
 
 
 function addAdminHooks() {
+	console.log("Hooking admin functionality")
 	socket.on("adminAuthed", async (result) => {
 		if (result) {
 			//alert("Admin!")
