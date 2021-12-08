@@ -62,6 +62,17 @@ function attachClientDisconnectEvents(socket) {
 	
 }
 
+function getUserListState(sessionId) {
+	var state = states[sessionId]
+	var userListDefaults = {}
+	if (loadedModule.getUserlistDefaults) {
+		userListDefaults = loadedModule.getUserlistDefaults()
+	}
+
+	//lastAnswer: state.lastAnswer || "", points: state.points || 0, group: state.group || 0
+	return {id: sessionId, ...userListDefaults, ...state}
+}
+
 //TODO: accurate and updated user list
 function attachUserListEvents(socket) {
 	socket.on("requestUserList", async() => {
@@ -70,17 +81,11 @@ function attachUserListEvents(socket) {
 		/*allUsers[0] = {id: "hello", answer: "world", points: 100, group: 1}
 		allUsers[1] = {id: "aaa", answer: "bbb", points: 550, group: 1}*/
 		for (sessionId in states) {
-			var state = states[sessionId]
-			console.log(state)
-			var userListDefaults = {}
-			if (loadedModule.getUserlistDefaults) {
-				userListDefaults = loadedModule.getUserlistDefaults()
-			}
-
+			var userListState = getUserListState(sessionId)
 			//lastAnswer: state.lastAnswer || "", points: state.points || 0, group: state.group || 0
-			allUsers.push({id: sessionId, ...userListDefaults, ...state})
+			allUsers.push(userListState)
 		}
-		
+		console.log(allUsers)
 		socket.emit("userList", allUsers)
 	})
 }
@@ -90,8 +95,17 @@ module.exports.attachUserListEvents = attachUserListEvents
 //Generic user handle code
 var idCounter = 0 //TODO: save to file to prevent collisions
 
+//Access code auth
+io.use((socket, next) => {
+	const token = socket.handshake.auth.token
+	if (token && authAccessCode === token) {
+		next()
+	} else {
+		console.log("Refused client with token", token)
+	}
+})
+
 io.on("connection", socket => { 
-	
 	console.log("connected", socket.id, socket.data.sessionId)
 	attachClientEvents(socket)
 	idCounter++
@@ -205,6 +219,9 @@ async function getStateAttr(socket, attr, defaultValue) {
 module.exports.getStateAttr = getStateAttr
 
 async function setStateAttr(socket, attr, value) {
+	var sessionId = socket
+	console.log("SOCKET TYPE", typeof(sessionId))
+	
 	getState(socket.data.sessionId)[attr] = value
 	socket.emit("stateAttrSet", attr, value)
 	var admins = await getAdminSockets()
@@ -215,24 +232,34 @@ async function setStateAttr(socket, attr, value) {
 
 module.exports.setStateAttr = setStateAttr
 
-
 async function setAllStateAttr(attr, value) {
 	for (var sessionId in states) {
 		states[sessionId][attr] = value
 		
 	}
-	
-	
+	//TODO: admin socket broadcast too
+
 	io.emit("stateAttrSet", attr, value)
 }
 
 module.exports.setAllStateAttr = setAllStateAttr
 
-function postAuthHandshake(socket) {
+async function postAuthHandshake(socket) {
+	
+	
+
 	setStateAttr(socket, "connected", true)
 	sendState(socket)
 	if (loadedModule.postAuthHandshake) {
 		loadedModule.postAuthHandshake(socket)
+	}
+	
+	var admins = await getAdminSockets()
+	for (var adminSocket of admins) {
+		var userState = getUserListState(socket.data.sessionId)
+		
+		console.log("STATE",userState)
+		adminSocket.emit("userListAdd", userState)
 	}
 }
 
@@ -241,19 +268,16 @@ var authAccessCode = ""
 
 async function attachClientEvents(socket) {
 	//Handshake to confirm user ID. Allows persistent ID across refresh.
-	socket.on("confirmId", async (accessCode, newId) => {
-		if (!accessCode || accessCode !== authAccessCode) {
-			socket.disconnect() //Do not permit bots to play
-			console.log("Attempt to access service with code", accessCode)
-		} else {
-			socket.data.sessionId = newId
-			var didKick = await kickIfClientDupe(socket, newId)
-			if (!didKick) {
-				console.log("Confirmed ID", newId)
-				
-			}
-			postAuthHandshake(socket)
+	socket.on("confirmId", async (newId) => {
+	
+		socket.data.sessionId = newId
+		var didKick = await kickIfClientDupe(socket, newId)
+		if (!didKick) {
+			console.log("Confirmed ID", newId)
+			
 		}
+		postAuthHandshake(socket)
+		
 	})
 	
 	
@@ -298,10 +322,10 @@ module.exports.startServer = function(port, accessCode, newAdminPassword) {
 
 	var timer = 1
 
-	setInterval(()=>{
+	/*setInterval(()=>{
 		io.emit("counter", timer)
 		//console.log(timer)
 		timer = timer+1
-	}, 1000)
+	}, 1000)*/
 }
 

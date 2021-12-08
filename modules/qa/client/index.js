@@ -79,7 +79,7 @@ function hookQandA() {
 	socket.on("questionCorrect", (wasCorrect) => {
 		//true case is handled by state update
 		if (!wasCorrect) {
-			$("#response").text("good try")
+			//$("#response").text("good try") //TODO: feedback?
 		}
 	})
 	

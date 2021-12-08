@@ -1,0 +1,75 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<h3 id="question-title">pien ;-;</h3>
+		<textarea id="question-data">
+		
+		pien1 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 10%
+pien2 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 11%
+pien3 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 5%
+pien4 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 15%
+		
+		</textarea>
+		
+		
+		
+		<div id="select-question-template" onclick="selectClicked(this)" style="display:inline-block;text-align:center;">
+			<img id="select-img" src="https://commons.wikimedia.org/wiki/File:PIEN_face.jpg" value="0" style="display:block;margin-left:auto;margin-right:auto;" />
+			<br />
+			<a id="select-text">pien</a>
+			
+		</div>
+		<div id="question-display">
+			
+		</div>
+		<script>
+			//if (!isAdmin()) {
+				$("#question-data").hide()
+				 
+			//}
+			var counter = 1
+			var lines = $("#question-data").val().split("\n")
+			var appended = []
+			for(var i = 0;i < lines.length;i++){
+				var line = lines[i].trim()
+				if (line.length > 0) {
+					var data = line.split(" ")
+					var text = data[0]
+					var src = data[1]
+					var maxW = null
+					if (data[2]) {
+						maxW = data[2]
+					}
+					var qClone = $("#select-question-template").clone()
+					qClone.find("#select-text").html(text)
+					qClone.find("#select-img").attr("src", src)
+					if (maxW) {
+						qClone.find("#select-img").css("max-width", maxW)
+					}
+					qClone.attr("value", counter)
+					
+					qClone.appendTo("#question-display")
+					appended.push(qClone)
+					counter++
+				}
+				
+			}
+			$("#select-question-template").hide()
+			var lastElem = null
+			function selectClicked(elem) {
+				setSelectedAnswer($(elem).attr("value"))
+				$(elem).css("background-color", "yellow")
+				if (lastElem) {
+					$(lastElem).css("background-color", "inherit")
+				}
+				lastElem = elem
+			}
+			for (elem of appended) {
+				elem.css("max-width", (100/counter).toString() + "%")
+			}
+			
+			
+		</script>
+	</body>
+</html>

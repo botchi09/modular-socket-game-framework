@@ -4,11 +4,27 @@
 	</head>
 	<body onload="adminLoaded()">
 		<div><h4>secret controls</h4></div>
+		
 		<div id="qa-container">
-			<div><a>Question</a><input id="sendQuestion" type="text" /></div>
+			<div><a>Question</a><textarea id="sendQuestion"></textarea></div>
+			<div>
+			  <input type="submit" value="Preview" onclick="previewQuestion()">
+			</div>
 			<div><a>Answer</a><input id="sendAnswer" type="text" /></div>
 			<div><input type="submit" onclick="sendQA()" value="new Q"/></div>
 			<div><input type="submit" onclick="givePointsToAnswerClicked(this)" value="give pts" /></div>
+		</div>
+		<div id="qa-presets">
+			
+			<span>
+				<input type="submit" value="simple" onclick="loadPreset(this)">
+			</span>
+			<span>
+				<input type="submit" value="choices" onclick="loadPreset(this)">
+			</span>
+			
+		</div>
+		<div id="qa-preview">
 		</div>
 		<div style="display:none;">
 			<li id="user-item">

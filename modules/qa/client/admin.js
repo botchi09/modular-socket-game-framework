@@ -39,9 +39,10 @@ function addAdminHooks() {
 		
 	})
 	socket.on("userListAdd", async (user) => {
-		
-		addToUserList(user)
-		
+		if (!userList.get("id", user.id)) {	
+
+			addToUserList(user)
+		}
 	})
 	socket.on("userListRemove", async (user) => {
 		
@@ -63,10 +64,10 @@ function sendQA() {
 	
 }
 
-var valueDefaults = {id: "", lastAnswer: "<none>", points: "0", connected: "false"}
+var valueDefaults = {id: "", lastAnswer: "<none>", points: "0", connected: false}
 
 var options = {
-	valueNames: [ "id", "lastAnswer", "points"],
+	valueNames: [ "id", "lastAnswer", "points", "connected"],
 	item: "user-item"
 }
 
@@ -74,6 +75,10 @@ var userList = null //TODO: WAIT FOR USER LIST
 
 function resortUserList() {
 	userList.sort("id")
+	userList.sort("", {order: "desc", sortFunction: function(a, b) {
+		
+		return (a.values().connected > b.values().connected) + (a.values().id < b.values().id)
+	}})
 	userList.update() //TODO: needed?
 }
 
@@ -91,7 +96,9 @@ function removeFromUserList(id) {
 }
 
 function addToUserList(userData) {
+	
 	userList.add(userData)
+	
 }
 
 function getUserValues(id) {
@@ -110,7 +117,7 @@ function updateUserList(id, attr, value) {
 		defaultValue = valueDefaults[attr]
 	}
 	
-	if (oldValues[attr]) {
+	if (oldValues && oldValues[attr]) {
 		oldValues[attr] = value
 		didModify = true
 		
@@ -120,11 +127,14 @@ function updateUserList(id, attr, value) {
 			didModify = true
 		}
 	}
-	if (didModify) {
-		removeFromUserList(id)
-		addToUserList(oldValues)
-		resortUserList()
-	}
+	
+	removeFromUserList(id)
+	
+
+	addToUserList(oldValues)
+	
+	resortUserList()
+	
 }
 
 function sendAdminPassword(pass) {
@@ -179,4 +189,28 @@ function givePointsClicked(elem) {
 function adminLoaded() {
 	console.log("Admin HTML loaded")
 	socket.emit("requestUserList")
+}
+
+function previewQuestion() {
+	$("#question").html("<p>PREVIEW</p>" + $("#sendQuestion").val())
+	
+}
+
+function resetPreview() {
+	
+}
+
+
+
+
+function loadPreset(elem) {
+	var presetVal = $(elem).val()
+	var presetUrl = "module/question_templates/" + presetVal + ".html"
+	console.log("Loading preset", presetVal)
+	
+	$.get(presetUrl, function(data) {
+		$("#sendQuestion").val(data)
+		console.log("loaded preset", presetVal)
+	})
+	
 }

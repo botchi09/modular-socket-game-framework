@@ -1,7 +1,9 @@
-
+function getParam(param){
+  return new URLSearchParams(window.location.search).get(param)
+}
 
 async function bodyLoaded() {
-	socket = io({withCredentials: true})
+	socket = io({auth: { token: getParam("ac") }})
 	await loadModule()
 	
 }
@@ -81,12 +83,8 @@ function createSocketHooks() {
 
 }
 
-function getParam(param){
-  return new URLSearchParams(window.location.search).get(param)
-}
 
 function confirmIdWithServer() {
-	var accessCode = getParam("ac")
-	socket.emit("confirmId", accessCode, Cookies.get("id"))
+	socket.emit("confirmId", Cookies.get("id"))
 }
 
