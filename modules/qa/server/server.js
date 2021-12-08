@@ -50,8 +50,7 @@ module.exports.attachAdminEvents = (socket) => {
 			var recipients = []
 			var giveToAll = false
 			if (sessionId) {
-				var recipientSocket = await baseModule.getSocketFromSessionId(sessionId)
-				recipients.push(recipientSocket)
+				recipients.push(sessionId)
 			} else {
 				
 				if (typeof(answer) === "string") { //simple null check fails here, for some reason
@@ -59,9 +58,10 @@ module.exports.attachAdminEvents = (socket) => {
 
 					for (var stateSessionId in states) {
 						var recipientSocket = await baseModule.getSocketFromSessionId(stateSessionId)
-						var socketAnswer = await baseModule.getStateAttr(recipientSocket, "lastAnswer", "")
+						var socketAnswer = states[stateSessionId]?.lastAnswer || ""
+						
 						if (socketAnswer === answer || answer.length == 0) {
-							recipients.push(recipientSocket)
+							recipients.push(stateSessionId)
 							
 						}
 						
@@ -70,7 +70,7 @@ module.exports.attachAdminEvents = (socket) => {
 			}
 			for (pointRecipient of recipients) {
 
-				var oldPts = await baseModule.getStateAttr(pointRecipient, "points", 0)
+				var oldPts = await baseModule.getState(pointRecipient)?.points || 0
 				var newPts = oldPts + points
 				console.log("Giving", points, "pts to", sessionId, "new pts", newPts)
 				await baseModule.setStateAttr(pointRecipient, "points", newPts)

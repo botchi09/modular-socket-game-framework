@@ -218,15 +218,31 @@ async function getStateAttr(socket, attr, defaultValue) {
 
 module.exports.getStateAttr = getStateAttr
 
+//Takes socket, or optionally sessionId string
 async function setStateAttr(socket, attr, value) {
-	var sessionId = socket
-	console.log("SOCKET TYPE", typeof(sessionId))
+	var sessionId = ""
+	var isString = false
+
+	if (typeof(socket) === "string") {
+		sessionId = socket
+		isString = true
+	} else {
+		sessionId = socket.data.sessionId
+	}
 	
-	getState(socket.data.sessionId)[attr] = value
-	socket.emit("stateAttrSet", attr, value)
+	getState(sessionId)[attr] = value
+	
+	var realSocket = null
+	if (isString) {
+		realSocket = await getSocketFromSessionId(sessionId)
+	}
+	//Don't propagate to client if no connection
+	if (realSocket) {
+		realSocket.emit("stateAttrSet", attr, value)
+	}
 	var admins = await getAdminSockets()
 	for (var adminSocket of admins) {
-		adminSocket.emit("userListUpdate", socket.data.sessionId, attr, value)
+		adminSocket.emit("userListUpdate", sessionId, attr, value)
 	}
 }
 

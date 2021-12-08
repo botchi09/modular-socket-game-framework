@@ -39,9 +39,11 @@ function addAdminHooks() {
 		
 	})
 	socket.on("userListAdd", async (user) => {
-		if (!userList.get("id", user.id)) {	
-
+		if (!getUserValues(user.id)) {	
+			console.log(user.id, "added to list", user)
 			addToUserList(user)
+		} else {
+			console.log(user.id, "in list")
 		}
 	})
 	socket.on("userListRemove", async (user) => {
@@ -96,19 +98,29 @@ function removeFromUserList(id) {
 }
 
 function addToUserList(userData) {
-	
-	userList.add(userData)
-	
+	try {
+		userList.add(userData)
+	} catch {
+		console.log("weird listjs bug caught")
+	}
 }
 
 function getUserValues(id) {
-	var matchingUsers = userList.get("id", id)
+	var matchingUsers = userList.get()
+	console.log("VALUES", matchingUsers)
 	if (matchingUsers.length > 0) {
-		return matchingUsers[0].values()
+		//Why do we need to do this? No clue.
+		//Sorting interferes with this, I think.
+		for (user of matchingUsers) {
+			if (user.values().id === id) {
+				return user.values()
+			}
+		}
 	}
 }
 
 function updateUserList(id, attr, value) {
+	
 	//We can't edit list items (TODO). Remove and re-add fixed?
 	var didModify = false
 	var oldValues = getUserValues(id)
@@ -116,21 +128,19 @@ function updateUserList(id, attr, value) {
 	if (valueDefaults[attr]) {
 		defaultValue = valueDefaults[attr]
 	}
-	
-	if (oldValues && oldValues[attr]) {
+	if (oldValues) {
 		oldValues[attr] = value
 		didModify = true
-		
-	} else {
+		console.log("Modifying", id, attr, value)
+	} /*else {
 		if (defaultValue) {
 			oldValues[attr] = defaultValue
 			didModify = true
 		}
-	}
+	}*/
 	
 	removeFromUserList(id)
-	
-
+	console.log("UPDATING FOR", id, attr,value,oldValues)
 	addToUserList(oldValues)
 	
 	resortUserList()
