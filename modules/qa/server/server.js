@@ -85,6 +85,11 @@ module.exports.getUserlistDefaults = () => {
 }
 
 module.exports.postSocketConnect = (socket) => {
+
+}
+
+
+module.exports.postAuthHandshake = (socket) => {
 	emitQA(socket)
 
 }

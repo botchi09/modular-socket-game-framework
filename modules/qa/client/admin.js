@@ -24,6 +24,9 @@ function addAdminHooks() {
 		if (result) {
 			//alert("Admin!")
 			console.log("Admin authed!")
+			isAdmin = () => {
+				return true
+			}
 			createAdminElements()
 		} else {
 			alert("Wrong password")

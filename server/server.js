@@ -231,6 +231,9 @@ module.exports.setAllStateAttr = setAllStateAttr
 function postAuthHandshake(socket) {
 	setStateAttr(socket, "connected", true)
 	sendState(socket)
+	if (loadedModule.postAuthHandshake) {
+		loadedModule.postAuthHandshake(socket)
+	}
 }
 
 var adminPassword = ""
