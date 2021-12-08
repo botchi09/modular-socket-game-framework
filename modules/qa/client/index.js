@@ -2,6 +2,22 @@ var answer = ""
 var questionComplete = false
 var questionId = null
 var changeTimer = null
+var answerEmitterId = "#answer_emitter"
+
+//Override this if we are admin! NEVER rely on this for authorititive state.
+function isAdmin() {
+	return false
+}
+
+//Convenience function to automatically set the selected answer
+function forwardAnswerValue() {
+	console.log("Forwarding answer input...")
+	setSelectedAnswer($("#answer").val())
+}
+
+function setSelectedAnswer(answer) {
+	$(answerEmitterId).val(new String(answer)).trigger("input")
+}
 
 function createStateUpdateHooks() {
 	
@@ -11,7 +27,7 @@ function createStateUpdateHooks() {
 		if (state.questionCorrect == true) {
 			questionCorrect()
 		} else {
-			resetQuestion()
+			//resetQuestion() //TODO: this may be causing bugs
 			
 		}
 	})
@@ -27,16 +43,16 @@ function createStateUpdateHooks() {
 
 function moduleLoaded() {
 	createStateUpdateHooks()
-	$("#answer").on("input", ()=>{
-		console.log($("#answer").val(), answer)
+	$(answerEmitterId).on("input", ()=>{
+		console.log($(answerEmitterId).val(), answer)
 		if (!questionComplete) {
 			if (changeTimer != null) {
 				clearTimeout(changeTimer)
 			}
 			changeTimer = setTimeout(()=>{
-				socket.emit("answerValidate", $("#answer").val())
+				socket.emit("answerValidate", $(answerEmitterId).val())
 				
-			}, 1000)
+			}, 3000)
 		}			
 	})
 
@@ -103,5 +119,5 @@ function displayMessage(msg) {
 }
 
 function setPointsDisplay(points) {
-	$("#points-display").text("Points: " + points)
+	$("#points-display").text("Points: " + (points || "0"))
 }

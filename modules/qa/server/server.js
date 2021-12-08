@@ -6,12 +6,20 @@ module.exports.moduleLoaded = (baseExports) => {
 
 //TODO: handle this in app.
 var curQuestionId = 0
-var curQuestionStr = "(DEMO) What's your name?"
-var curAnswerStr = "Ryan"
+var curQuestionStr = "(DEMO) What's your name? <input id='answer' type='text' oninput='forwardAnswerValue()' \/>"
+var curAnswerStr = ""
 
 function emitQA(socket) {
-	socket.emit("question", curQuestionStr, curQuestionId) 
-	socket.emit("answer", curAnswerStr)
+	console.log("New question set", curQuestionId)
+	if (socket) {
+		//Send to a single user
+		socket.emit("question", curQuestionStr, curQuestionId) 
+		socket.emit("answer", curAnswerStr)
+	} else {
+		//Broadcast to all
+		baseModule.getServer().emit("question", curQuestionStr, curQuestionId) 
+		baseModule.getServer().emit("answer", curAnswerStr)
+	}
 
 }
 
@@ -23,8 +31,9 @@ module.exports.attachAdminEvents = (socket) => {
 			curQuestionStr = question
 			curAnswerStr = answer
 			
-			emitQA(socket)
+			emitQA()
 			await baseModule.setAllStateAttr("questionCorrect", false)
+			console.log("Admin set new question")
 		}
 	})
 	socket.on("answerValidate", async(answer) => {
@@ -69,6 +78,10 @@ module.exports.attachAdminEvents = (socket) => {
 			
 		}
 	})
+}
+
+module.exports.getUserlistDefaults = () => {
+	return {points: 0}
 }
 
 module.exports.postSocketConnect = (socket) => {

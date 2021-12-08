@@ -60,8 +60,11 @@ function sendQA() {
 	
 }
 
+var valueDefaults = {id: "", lastAnswer: "<none>", points: "0", connected: "false"}
+
 var options = {
-	valueNames: [ "id", "lastAnswer", "points" ]
+	valueNames: [ "id", "lastAnswer", "points"],
+	item: "user-item"
 }
 
 var userList = null //TODO: WAIT FOR USER LIST
@@ -97,11 +100,28 @@ function getUserValues(id) {
 
 function updateUserList(id, attr, value) {
 	//We can't edit list items (TODO). Remove and re-add fixed?
+	var didModify = false
 	var oldValues = getUserValues(id)
-	oldValues[attr] = value
-	removeFromUserList(id)
-	addToUserList(oldValues)
-	resortUserList()
+	var defaultValue = null
+	if (valueDefaults[attr]) {
+		defaultValue = valueDefaults[attr]
+	}
+	
+	if (oldValues[attr]) {
+		oldValues[attr] = value
+		didModify = true
+		
+	} else {
+		if (defaultValue) {
+			oldValues[attr] = defaultValue
+			didModify = true
+		}
+	}
+	if (didModify) {
+		removeFromUserList(id)
+		addToUserList(oldValues)
+		resortUserList()
+	}
 }
 
 function sendAdminPassword(pass) {

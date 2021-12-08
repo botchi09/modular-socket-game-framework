@@ -11,10 +11,10 @@ app.use(express.static("client"))
 app.get("/", function(req, res){
 	console.log("Base dir request")
 })
-/*
+
 app.get("/module", function(req, res){
 	console.log("module dir request")
-})*/
+})
 
 module.exports.getServer = function() {
 	return io
@@ -33,6 +33,17 @@ function socketIsAdmin(socket) {
 module.exports.socketIsAdmin = socketIsAdmin
 
 function attachAdminEvents(socket) {
+	
+	socket.on("tryAdminAuth", async (sentPw) => {
+		if (sentPw === adminPassword) {
+			socket.data.admin = true
+			socket.emit("adminAuthed", true)
+		} else {
+			socket.data.admin = false
+			socket.emit("adminAuthed", false)
+		}
+	})
+	
 	loadedModule.attachAdminEvents(socket)
 	//HOOK: delegate all three here
 	
@@ -42,6 +53,14 @@ function attachAdminEvents(socket) {
 }
 
 module.exports.attachAdminEvents = attachAdminEvents
+
+function attachClientDisconnectEvents(socket) {
+	socket.on("disconnect", async() => {
+		await setStateAttr(socket, "connected", false)
+	})
+	
+	
+}
 
 //TODO: accurate and updated user list
 function attachUserListEvents(socket) {
@@ -53,7 +72,13 @@ function attachUserListEvents(socket) {
 		for (sessionId in states) {
 			var state = states[sessionId]
 			console.log(state)
-			allUsers.push({id: sessionId, lastAnswer: state.lastAnswer || "", points: state.points || 0, group: state.group || 0})
+			var userListDefaults = {}
+			if (loadedModule.getUserlistDefaults) {
+				userListDefaults = loadedModule.getUserlistDefaults()
+			}
+
+			//lastAnswer: state.lastAnswer || "", points: state.points || 0, group: state.group || 0
+			allUsers.push({id: sessionId, ...userListDefaults, ...state})
 		}
 		
 		socket.emit("userList", allUsers)
@@ -65,13 +90,15 @@ module.exports.attachUserListEvents = attachUserListEvents
 //Generic user handle code
 var idCounter = 0 //TODO: save to file to prevent collisions
 io.on("connection", socket => { 
+	
 	console.log("connected", socket.id, socket.data.sessionId)
 	attachClientEvents(socket)
 	idCounter++
 	socket.emit("getId", idCounter)
-	socket.emit("counter", "connected!")
+	//socket.emit("counter", "connected!")
 	loadedModule.postSocketConnect(socket)
 	logAllClients()
+	attachClientDisconnectEvents(socket)
 	
 })
 
@@ -163,11 +190,14 @@ function sendState(socket) {
 module.exports.sendState = sendState
 
 async function getStateAttr(socket, attr, defaultValue) {
-	var state = getState(socket.data.sessionId)
-	if (state[attr] == null) {
-		state[attr] = defaultValue
+	if (socket) {
+		var state = getState(socket.data.sessionId)
+		if (state[attr] == null) {
+			state[attr] = defaultValue
+		}
+		return state[attr]
 	}
-	return state[attr]
+	return defaultValue
 }
 
 module.exports.getStateAttr = getStateAttr
@@ -197,31 +227,30 @@ async function setAllStateAttr(attr, value) {
 module.exports.setAllStateAttr = setAllStateAttr
 
 function postAuthHandshake(socket) {
+	setStateAttr(socket, "connected", true)
 	sendState(socket)
 }
 
 var adminPassword = ""
+var authAccessCode = ""
 
 async function attachClientEvents(socket) {
 	//Handshake to confirm user ID. Allows persistent ID across refresh.
-	socket.on("confirmId", async (newId) => {
-		socket.data.sessionId = newId
-		var didKick = await kickIfClientDupe(socket, newId)
-		if (!didKick) {
-			console.log("Confirmed ID", newId)
-			
-		}
-		postAuthHandshake(socket)
-	})
-	socket.on("tryAdminAuth", async (sentPw) => {
-		if (sentPw === adminPassword) {
-			socket.data.admin = true
-			socket.emit("adminAuthed", true)
+	socket.on("confirmId", async (accessCode, newId) => {
+		if (!accessCode || accessCode !== authAccessCode) {
+			socket.disconnect() //Do not permit bots to play
+			console.log("Attempt to access service with code", accessCode)
 		} else {
-			socket.data.admin = false
-			socket.emit("adminAuthed", false)
+			socket.data.sessionId = newId
+			var didKick = await kickIfClientDupe(socket, newId)
+			if (!didKick) {
+				console.log("Confirmed ID", newId)
+				
+			}
+			postAuthHandshake(socket)
 		}
 	})
+	
 	
 	attachAdminEvents(socket)
 }
@@ -235,11 +264,11 @@ module.exports.loadModule = function(moduleName) {
 	loadedModule.moduleName = moduleName
 }
 
-module.exports.startServer = function(port) {
+module.exports.startServer = function(port, accessCode) {
 	
-
+	authAccessCode = accessCode
 	httpServer.listen(port)
-	console.log("server up on", port)
+	console.log("server up on", port, "access code", authAccessCode)
 
 	var timer = 1
 

@@ -7,7 +7,20 @@
 		<div id="points-display" style="position: absolute;right: 0;top: 0;"></div>
 		
 		<h1 id="display"></h1>
-		<p>Question: <a id="question">hello</a><br />Answer: <input type="text" id="answer" /><p>
+		<!--question id div will contain all sent html/inline scripts
+		It will also modify the answer_emitter contents-->
+		<div id="question">
+			Question: Error
+			<input id="answer" type="text" oninput="forwardAnswerValue()" />
+			<script>
+				console.log("Inline script loaded")
+			</script>
+		</div>
+		
+		
+		<div id="answer_emitter_container" style="display: none;">
+			<input type="text" id="answer_emitter" />
+		</div>
 		<div id="response"></div>
 		<div id="admin_controls"></div>
 	</body>

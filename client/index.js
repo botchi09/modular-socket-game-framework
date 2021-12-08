@@ -81,8 +81,12 @@ function createSocketHooks() {
 
 }
 
+function getParam(param){
+  return new URLSearchParams(window.location.search).get(param)
+}
+
 function confirmIdWithServer() {
-	
-	socket.emit("confirmId", Cookies.get("id"))
+	var accessCode = getParam("ac")
+	socket.emit("confirmId", accessCode, Cookies.get("id"))
 }
 

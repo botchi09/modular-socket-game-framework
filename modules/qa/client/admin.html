@@ -10,13 +10,16 @@
 			<div><input type="submit" onclick="sendQA()" value="new Q"/></div>
 			<div><input type="submit" onclick="givePointsToAnswerClicked(this)" value="give pts" /></div>
 		</div>
+		<div style="display:none;">
+			<li id="user-item">
+				<span class="id"></span>
+				<span class="lastAnswer">(none)</span>
+				<span><a class="points" href="#!" onclick="givePointsClicked(this)"></a></span>
+			</li>
+		</div>
 		<div id="user-list">
 			<ul class="list">
-				<li>
-					<span class="id"></span>
-					<span class="lastAnswer"></span>
-					<span><a class="points" href="#!" onclick="givePointsClicked(this)"></a></span>
-				</li>
+				
 			</ul>
 		</div>
 	</body>
