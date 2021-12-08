@@ -89,11 +89,13 @@ module.exports.attachUserListEvents = attachUserListEvents
 
 //Generic user handle code
 var idCounter = 0 //TODO: save to file to prevent collisions
+
 io.on("connection", socket => { 
 	
 	console.log("connected", socket.id, socket.data.sessionId)
 	attachClientEvents(socket)
 	idCounter++
+	saveIdCounter()
 	socket.emit("getId", idCounter)
 	//socket.emit("counter", "connected!")
 	loadedModule.postSocketConnect(socket)
@@ -264,11 +266,32 @@ module.exports.loadModule = function(moduleName) {
 	loadedModule.moduleName = moduleName
 }
 
-module.exports.startServer = function(port, accessCode) {
-	
+function saveIdCounter() {
+	try {
+		fs.writeFileSync("idcounter.txt", idCounter.toString())
+	} catch(e) {
+		console.log("Could not write id counter")
+		console.log(e)
+	}
+}
+
+function loadIdCounter() {
+	try {
+		var loadedId = parseInt(fs.readFileSync("idcounter.txt", "utf8"))
+		idCounter = loadedId
+		console.log("IDs assigned from", loadedId)
+	} catch {
+		console.log("No ID counter file exists")
+		//We can leave it at the 0 default if this is the case.
+	}
+}
+
+module.exports.startServer = function(port, accessCode, newAdminPassword) {
+	loadIdCounter()
 	authAccessCode = accessCode
+	adminPassword = newAdminPassword
 	httpServer.listen(port)
-	console.log("server up on", port, "access code", authAccessCode)
+	console.log("server up on", port, "access code", authAccessCode, "admin pw", adminPassword)
 
 	var timer = 1
 

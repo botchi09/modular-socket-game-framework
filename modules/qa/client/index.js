@@ -5,6 +5,7 @@ var changeTimer = null
 var answerEmitterId = "#answer_emitter"
 
 //Override this if we are admin! NEVER rely on this for authorititive state.
+//Just for user experience.
 function isAdmin() {
 	return false
 }
