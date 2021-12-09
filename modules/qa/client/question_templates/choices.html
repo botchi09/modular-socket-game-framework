@@ -2,20 +2,19 @@
 	<head>
 	</head>
 	<body>
-		<h3 id="question-title">pien ;-;</h3>
+		<h3 id="question-title">Which mountain is the tallest?</h3>
 		<textarea id="question-data">
 		
-		pien1 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 10%
-pien2 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 11%
-pien3 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 5%
-pien4 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 15%
+		Everest https://upload.wikimedia.org/wikipedia/commons/f/f6/Everest_kalapatthar.jpg
+Fuji https://i.pinimg.com/originals/18/c7/73/18c773e9bdcc3b6cc46a5f05ccc2ed6c.jpg
+Kilimanjaro https://1.bp.blogspot.com/-cB8bL8q5BPU/TjdPQxGUnPI/AAAAAAAAHjk/OVFMXaMmbRo/s1600/mt_kilimanjaro_122006.jpg
 		
 		</textarea>
 		
 		
 		
 		<div id="select-question-template" onclick="selectClicked(this)" style="display:inline-block;text-align:center;">
-			<img id="select-img" src="https://commons.wikimedia.org/wiki/File:PIEN_face.jpg" value="0" style="display:block;margin-left:auto;margin-right:auto;" />
+			<img id="select-img" src="https://commons.wikimedia.org/wiki/File:PIEN_face.jpg" value="0" style="display:block;margin-left:auto;margin-right:auto;width:100%;max-height:min-content;" />
 			<br />
 			<a id="select-text">pien</a>
 			
@@ -58,15 +57,18 @@ pien4 https://upload.wikimedia.org/wikipedia/commons/2/26/PIEN_face.jpg 15%
 			$("#select-question-template").hide()
 			var lastElem = null
 			function selectClicked(elem) {
-				setSelectedAnswer($(elem).attr("value"))
+				var value = $(elem).attr("value")
+				setSelectedAnswer(value)
 				$(elem).css("background-color", "yellow")
-				if (lastElem) {
+				if (lastElem && lastElem !== elem) {
 					$(lastElem).css("background-color", "inherit")
 				}
 				lastElem = elem
 			}
 			for (elem of appended) {
-				elem.css("max-width", (100/counter).toString() + "%")
+				var newWidth = ((100/(counter-1))-3).toString() + "vh"
+				elem.css("max-width", newWidth)
+				elem.find("#select-img").css("max-height", newWidth)
 			}
 			
 			

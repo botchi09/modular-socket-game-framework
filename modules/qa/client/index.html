@@ -2,14 +2,113 @@
 	<head>
 		<script src="module/index.js"></script>
 		<script src="module/admin.js"></script>
+		<style>
+		.pointsPlusContainer {
+			z-index: -99;
+			overflow:hidden;
+			position: absolute;
+			width: 95%;
+			height:95%;
+		}
+		.pointsPlus {
+			position: absolute;right: -500px;top: 0px;
+			font-size: xxx-large;
+			style: display:none;
+			
+		}
+		
+		.pointsDisplay {
+			position: absolute;right: 0;top: 0;	font-size: large;
+			
+		}
+		.pointsAdded {
+			z-index: 99;
+			animation: pointsAddedAppear 2000ms linear;
+		}
+		
+		.pointsAddedBounce {
+			z-index: 99;
+			animation: pointsAddedBounceEffect 1000ms linear, goldShine 1000ms linear;
+		}
+		
+		@keyframes goldShine {
+			0%{
+				text-shadow: 0;
+				color: #FFD700;
+			}
+			50%{
+			text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #FFD700, 0 0 40px #FFD700, 0 0 50px #FFD700, 0 0 60px #FFD700, 0 0 70px #FFD700;
+			color: #FFD700;
+			}
+			100%{
+				text-shadow: 0;
+			}
+		}
+		
+		@keyframes pointsAddedBounceEffect {
+		  0% {
+			transform: rotate(-20deg);
+			opacity: 0%;
+			position: absolute;right: 75vh;top: 60vh;
+			
+		  }
+		  30% {
+			opacity: 0%;
+		  }
+		  50% {
+			opacity: 100%;
+		  }
+		  100% {
+			opacity: 0%;
+			transform: rotate(5deg);
+			position: absolute;right: 75vh;top: 60vh;
+		  }
+		}
+		
+		@keyframes pointsAddedAppear {
+		  0% {
+			color: #FFD700;
+			text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+			opacity: 0%;
+			transform: skewX(15deg);
+			position: absolute;right: 75vh;top: 50vh;
+			
+		  }
+		  10%{
+		  opacity: 100%;
+			transform: skewX(0deg);
+			font-size: xxx-large;
+			}
+		  80%{
+			position: absolute;right: 75vh;top: 50vh;
+			font-size: xxx-large;
+			color: #FFD700;
+		  }
+		  100% {
+			
+		  }
+		@keyframes pointsAddedMove {
+		  0% {
+						
+
+		  }
+		  99% {}
+		  100% {
+		  }
+		}
+		</style>
 	</head>
 	<body>
-		<div id="points-display" style="position: absolute;right: 0;top: 0;"></div>
+		<div id="points-display" class="pointsDisplay"></div>
+		<div id="points-plus-container" class="pointsPlusContainer">
+			<div id="points-plus" class="pointsPlus">↑Nice!↑</div>
+		</div>
+
 		
 		<h1 id="display"></h1>
 		<!--question id div will contain all sent html/inline scripts
 		It will also modify the answer_emitter contents-->
-		<div id="question">
+		<div id="question" style="height: 80%;width:100%; contain: content;">
 			Question: Error
 			<input id="answer" type="text" oninput="forwardAnswerValue()" />
 			<script>

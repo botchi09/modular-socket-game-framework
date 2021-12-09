@@ -37,6 +37,7 @@ function createStateUpdateHooks() {
 		if (attr === "points") {
 			console.log("wow points nice!", value)
 			setPointsDisplay(value)
+			doPointsAnimation()
 			
 		}
 	})
@@ -117,6 +118,29 @@ function setAnswer(newAnswer) {
 
 function displayMessage(msg) {
 	$("#display").html(msg)
+}
+
+
+function reset_animation(el) {
+  el.style.animation = 'none';
+  el.offsetHeight; /* trigger reflow */
+  el.style.animation = null; 
+}
+
+var pointsDisplayId = "points-display"
+var pointsMessageId = "points-plus"
+
+function doPointsAnimation() {
+	$("#"+pointsDisplayId).removeClass("pointsAdded")
+	$("#"+pointsDisplayId).addClass("pointsAdded")
+	
+	$("#"+pointsMessageId).removeClass("pointsAdded pointsAddedBounce")
+	$("#"+pointsMessageId).addClass("pointsAdded pointsAddedBounce")
+	
+	reset_animation(document.getElementById(pointsDisplayId))
+	reset_animation(document.getElementById("points-plus"))
+	
+	console.log("Points animation")
 }
 
 function setPointsDisplay(points) {
